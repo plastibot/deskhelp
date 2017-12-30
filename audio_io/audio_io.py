@@ -9,7 +9,7 @@ class AudioIO:
     def __init__(self, audio_file_path):
         self.audio_file_path = audio_file_path
         self.threshold = 500
-        self.chunk_size = 1024
+        self.chunk_size = 512
         self.format = pyaudio.paInt16
         self.rate = 44100
         self.maximum = 16384
@@ -81,6 +81,12 @@ class AudioIO:
         while 1:
             # little endian, signed short
             snd_data = array('h', stream.read(self.chunk_size))
+            #try:
+            #    snd_data = array('h', stream.read(self.chunk_size))
+            #except IOError as ex:
+            #    if ex[1] != pyaudio.paInputOverflowed:
+            #        raise
+            #    snd_data = array('h', '\x00' * chunk)
             if byteorder == 'big':
                 snd_data.byteswap()
             r.extend(snd_data)

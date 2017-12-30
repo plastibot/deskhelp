@@ -9,6 +9,7 @@ from watson_developer_cloud import TextToSpeechV1
 
 from audio_io.audio_io import AudioIO 
 
+import time
 
 context = {}
 
@@ -42,12 +43,41 @@ def main():
     password=os.environ.get("TTS_PASSWORD"),
     x_watson_learning_opt_out=True)  # Optional flag
 
+  current_action = ''
+  msg_out = ''
 
-  while(True):
+  while current_action != 'end_conversation':
     message = listen(stt)
-    emotion = get_emotion(tone_analyzer, message)
-    response = send_message(conversation, workspace_id, message, emotion) 
-    speak(tts, response['output']['text'][0])
+#    emotion = get_emotion(tone_analyzer, message)
+    print(message)
+    response = send_message(conversation, workspace_id, message, "sad") 
+
+    # Check for a text response from API
+    if response['output']['text']:
+      msg_out = response['output']['text'][0]
+
+    # Check for action flags sent  by the dialog
+    if 'action' in response['output']:
+      current_action = response['output']['action']
+
+    # User asked what time is it, so we output the local system time
+    if current_action == 'display_time':
+      msg_out = 'The current time is ' + time.strftime('%I:%M %p')
+      current_action = ''
+
+    # User asked robot to walk
+    if current_action == 'walk':
+      msg_out = 'Walking'
+      current_action = ''
+
+    # User asked robot to wave
+    if current_action == 'wave':
+      msg_out = 'Waving'
+      current_action = ''
+
+    print(msg_out)
+
+    speak(tts, msg_out)
     #recorder.play_from_file("output.wav")
 
     
@@ -60,8 +90,13 @@ def listen(stt):
 
   print("Transcribing audio....\n")
   result = transcribe_audio(stt, 'input.wav')
-  
-  text = result['results'][0]['alternatives'][0]['transcript']
+
+  print(result)
+
+  try:
+    text = result['results'][0]['alternatives'][0]['transcript']
+  except IndexError:
+    text = "I didn't get it"
   print("Text: " + text + "\n")
   return text  
 
@@ -86,11 +121,16 @@ def send_message(conversation, workspace_id, message, emotion):
 
   response = conversation.message(
     workspace_id=workspace_id,
-    message_input={'text': message},
+    input={'text': message},
     context=context)
+
+  if response['output']['text']:
+    print(response['output']['text'][0])
+
+  print(json.dumps(response, indent=4))
+  
   context = response['context']
 
-  print(response['output']['text'][0])
   return response
 
 def speak(tts, text):
