@@ -1,3 +1,5 @@
+#!/home/pi/citro/bin/python
+
 import os
 import json
 import serial
@@ -10,9 +12,41 @@ from watson_developer_cloud import ToneAnalyzerV3
 from watson_developer_cloud import TextToSpeechV1
 
 from audio_io.audio_io import AudioIO 
+from neopixel import *
 
+# LED strip configuration:
+LED_COUNT      = 7      # Number of LED pixels.
+LED_PIN        = 18      # GPIO pin connected to the pixels (18 uses PWM!).
+#LED_PIN        = 10      # GPIO pin connected to the pixels (10 uses SPI /dev/spidev0.0).
+LED_FREQ_HZ    = 800000  # LED signal frequency in hertz (usually 800khz)
+LED_DMA        = 10      # DMA channel to use for generating signal (try 10)
+LED_BRIGHTNESS = 64     # Set to 0 for darkest and 255 for brightest
+LED_INVERT     = False   # True to invert the signal (when using NPN transistor level shift)
+#LED_CHANNEL    = 0       # set to '1' for GPIOs 13, 19, 41, 45 or 53
+#LED_STRIP      = ws.WS2811_STRIP_GRB   # Strip type and colour ordering
 
 context = {}
+
+def rainbowCycle(strip, wait_ms=20, iterations=5):
+  """Draw rainbow that uniformly distributes itself across all pixels."""
+  for j in range(256*iterations):
+    for i in range(strip.numPixels()):
+      strip.setPixelColor(i, wheel((int(i * 256 / strip.numPixels()) + j) & 255))
+    strip.show()
+    time.sleep(wait_ms/1000.0)
+
+    
+def theaterChaseRainbow(strip, wait_ms=50):
+  """Rainbow movie theater light style chaser animation."""
+  for j in range(256):
+    for q in range(3):
+      for i in range(0, strip.numPixels(), 3):
+	strip.setPixelColor(i+q, wheel((i+j) % 255))
+      strip.show()
+      time.sleep(wait_ms/1000.0)
+      for i in range(0, strip.numPixels(), 3):
+	strip.setPixelColor(i+q, 0)
+
 
 def transcribe_audio(stt, path_to_audio_file):
   with open(join(dirname(__file__), path_to_audio_file), 'rb') as audio_file:
@@ -54,6 +88,11 @@ def main():
     password=os.environ.get("TTS_PASSWORD"),
     x_watson_learning_opt_out=True)  # Optional flag
 
+  # Create NeoPixel object with appropriate configuration.
+  strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS)
+  # Intialize the library (must be called once before other functions).
+  strip.begin()
+  
   current_action = ''
   msg_out = ''
 
@@ -76,18 +115,46 @@ def main():
       msg_out = 'The current time is ' + time.strftime('%I:%M %p')
       current_action = ''
 
-    # User asked robot to walk
-    if current_action == 'walk':
-      msg_out = 'Walking'
-      ser.write("1,5=".encode())
+    # User asked bot to turn red
+    if current_action == 'red':
+      msg_out = 'Turning Red'
+      for pix in range(0, strip.numPixels()):
+        strip.setPixelColor(pix, Color(255, 0, 0))
+        strip.show()
+        time.sleep(50/1000.0)
       current_action = ''
 
-    # User asked robot to wave
-    if current_action == 'wave':
-      msg_out = 'Waving'
-      ser.write("1,7=".encode())
+    # User asked bot to turn green
+    if current_action == 'green':
+      msg_out = 'Turning green'
+      for pix in range(0, strip.numPixels()):
+        strip.setPixelColor(pix, Color(0, 255, 0))
+        strip.show()
+        time.sleep(50/1000.0)
+      current_action = ''
+      
+    # User asked bot to turn blue
+    if current_action == 'blue':
+      msg_out = 'Turning blue'
+      for pix in range(0, strip.numPixels()):
+        strip.setPixelColor(pix, Color(0, 0, 255))
+        strip.show()
+        time.sleep(50/1000.0)
       current_action = ''
 
+    # User asked bot to turn disco
+    if current_action == 'disco':
+      msg_out = 'Turning disco'
+      theaterChaseRainbow(strip)
+      current_action = ''
+
+    # User asked bot to set rainbow color
+    if current_action == 'raibow':
+      msg_out = 'Turning rainbow'
+      RainbowCycle(strip)
+      current_action = ''
+
+      
     print(msg_out)
 
     speak(tts, msg_out)
