@@ -1,15 +1,24 @@
-# pybot
+# DeskHelp
 
-Brains for my Biped Robot. See repo "citro.git" for Robot assembly instructions.
+A Desk assistant controlled by voice commands. 
 
-Runs on Raspbian on a Raspberry Pi Zero W. Pybot uses python 3.6 and communicates using PySerial to an ESP8266 controlling all the RC Servo movements.
-
-Uses Watson for voice and video capabilities.
+Runs on Raspbian on a Raspberry Pi Zero W. Programmed using python 3.6. Uses the IBM Watson API for voice capabilities. Uses the GPIO to control neopixels to let other people know your status (i.e Green color - available to talk, Red color - unavailable, Blue color - Out of the office, etc.)
 
 
 ## INSTALLATION
 
 Start with a fresh Raspbian image from https://www.raspberrypi.org/downloads/raspbian/
+
+1. Transfer the Raspbian image to your SD card. https://www.raspberrypi.org/learning/software-guide/quickstart/
+
+2. Insert Sd card, Connect a keyboard and Monitor to your Raspberry Pi Zero W. https://www.raspberrypi.org/learning/hardware-guide/quickstart/
+
+3. Connect to wireless. https://www.raspberrypi.org/learning/software-guide/wifi/
+
+4. Run Raspi-config and enable SSH and VNC. https://www.raspberrypi.org/learning/teachers-guide/remote/
+
+5. configure Locals for Keyboard, Languaje, time and wifi.
+
 
 ### Set your USB Audio device as default
 
@@ -62,58 +71,62 @@ ctl.!default {
 }
 ```
 
-Now your default audio out (speakers) and audio in (mic) are your usb device.
-You can verify by runing the following and hearing sound on your speaker
-aplay /usr/share/sounds/alsa/Front_Center.wav
-and running the following ocmmand and being able to record your voice
-arecord test.wav
+Now your default audio out (speakers) and audio in (mic) are your usb device. You can verify by runing the following command and recording sound on your microphone
 
+```
+$ arecord  t.wav
+```
 
+press Control+C on your keyboard to stop recording, and then use the following command to play the sound you just recorded on your speakers.
+
+```
+$ aplay t.wav
+```
 
 ### Install latest version of Python 3.6.x
+
+At the time of this tutorial the latest version of Python was 3.6.4. The instructions below are for that version. If you want the latest version, simply replace the version number accordingly on the commands below.
 
 Installing dependencies:
 ```
 $ sudo apt-get -y install libbz2-dev liblzma-dev libsqlite3-dev libncurses5-dev libgdbm-dev zlib1g-dev libreadline-dev libssl-dev tk-dev build-essential libncursesw5-dev libc6-dev openssl
 ```
 
-Downloading needful version (execution time depends of channel bandwidth):
+Download Python:
 ```
 $ cd ~
-$ wget https://www.python.org/ftp/python/3.6.0/Python-3.6.0.tgz
-$ tar -zxvf Python-3.6.0.tgz
+$ wget https://www.python.org/ftp/python/3.6.4/Python-3.6.4.tgz
+$ tar -zxvf Python-3.6.4.tgz
 ```
 
 Configure, build and install from source:
 ```
-$ cd Python-3.6.0
+$ cd Python-3.6.4
 $ ./configure
 $ make
 $ sudo make install
-```
-
-Create and activate your virtual enviroment
-```
-$ python3 -m venv citro
-$ source ~/citro/bin/activate
 ```
 
 ### install Python libraries
 
 Watson-Devloper-Cloud
 ```
-pip install —upgrade watson-developer-cloud
+sudo apt-get install libffi-dev
+sudo pip3 install —upgrade watson-developer-cloud
 ```
-
-*** If it fails installin ffi you will need to install libffi using sudo apt-get install libffi-dev
 
 install python-dotenv
 ```
-pip install python-dotenv
+sudo pip3 install python-dotenv
 ```
 
 install Portaudio and PyAudio
 ```
 sudo apt-get install portaudio19-dev
-pip install pyaudio
+sudo pip3 install pyaudio
+```
+
+install NeoPixel library fo rLED control
+```
+sudo pip3 install rpi_ws281x
 ```
