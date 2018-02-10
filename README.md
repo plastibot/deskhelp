@@ -111,22 +111,22 @@ $ sudo make install
 
 Watson-Devloper-Cloud
 ```
-sudo apt-get install libffi-dev
-sudo pip3 install —upgrade watson-developer-cloud
+$ sudo apt-get install libffi-dev
+$ sudo pip3 install —upgrade watson-developer-cloud
 ```
 
 install python-dotenv
 ```
-sudo pip3 install python-dotenv
+$ sudo pip3 install python-dotenv
 ```
 
 install Portaudio and PyAudio
 ```
-sudo apt-get install portaudio19-dev
-sudo pip3 install pyaudio
+$ sudo apt-get install portaudio19-dev
+$ sudo pip3 install pyaudio
 ```
 
 install NeoPixel library fo rLED control
 ```
-sudo pip3 install rpi_ws281x
+$ sudo pip3 install rpi_ws281x
 ```
