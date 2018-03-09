@@ -1,7 +1,5 @@
-import snowboydecoder
 import sys
 import signal
-#import speech_recognition as sr
 import os
 import json
 import time
@@ -9,11 +7,11 @@ import wave
 import pyaudio
 from os.path import join, dirname
 from dotenv import load_dotenv
+from snowboy import snowboydecoder
 from watson_developer_cloud import SpeechToTextV1 as SpeechToText
 from watson_developer_cloud import ConversationV1
 from watson_developer_cloud import TextToSpeechV1
 
-#from audio_io.audio_io import
 
 interrupted = False
 context = {}
@@ -42,8 +40,6 @@ def speak(tts, text):
                 accept="audio/wav",
                 voice="en-US_AllisonVoice"))
 
-    #snowboydecoder.play_audio_file('output.wav')
-
     wf = wave.open('output.wav', 'rb')
     p = pyaudio.PyAudio()
     stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
@@ -67,8 +63,6 @@ def audioRecorderCallback(fname):
     print("converting audio to text")
     current_action = ''
 
-#    result = transcribe_audio(stt, fname)
-    
     try:
         result = transcribe_audio(stt, fname)
     except UnknownValueError:
@@ -98,7 +92,19 @@ def audioRecorderCallback(fname):
     if current_action == 'display_time':
         msg_out='The current time is ' + time.strftime('%I:%M:%S %p')
         current_action = ''
-    
+
+    # User asked to turn banner sign red
+    if current_action == 'red':
+        msg_out = 'turning Red'
+#        for pix in range(0, strip.numPixels()):
+#            strip.setPixelColor(pic, Color(255, 0, 0))
+#            strip.show()
+#            time.sleep(50/1000.0)
+        current_action = ''
+
+
+
+        
     print(msg_out)
 
     speak(tts, msg_out)
